@@ -1,73 +1,61 @@
 import s from './App.css';
-import React, { Component } from 'react';
+import { useState } from 'react';
 import Statistics from 'components/Statistics/Statistics';
 import Section from 'components/Section/Section';
 import FeedbackOptions from 'components/FeedbackOptions/FeedbackOptions';
 
-class App extends Component {
-	constructor() {
-		super();
-		this.countTotalFeedback = this.countTotalFeedback.bind(this);
-		this.countPositiveFeedbackPercentage =
-			this.countPositiveFeedbackPercentage.bind(this);
-		this.onLeaveFeedback = this.onLeaveFeedback.bind(this);
-	}
+function App() {
+	const [good, setGoodState] = useState(0);
+	const [neutral, setNeutralState] = useState(0);
+	const [bad, setBadState] = useState(0);
 
-	state = {
-		good: 0,
-		neutral: 0,
-		bad: 0,
+	const countTotalFeedback = () => {
+		return good + neutral + bad;
 	};
 
-	countTotalFeedback() {
-		this.setState(state => {
-			const { good, neutral, bad } = state;
-			return {
-				total: good + neutral + bad,
-			};
-		});
-	}
+	const countPositiveFeedbackPercentage = () => {
+		return Math.round((100 / (good + neutral + bad)) * good);
+	};
 
-	countPositiveFeedbackPercentage() {
-		this.setState(state => {
-			const { good, neutral, bad } = state;
-			return {
-				positivePercentage: Math.round((100 / (good + neutral + bad)) * good),
-			};
-		});
-	}
+	const onLeaveFeedback = option => {
+		switch (option) {
+			case 'good':
+				setGoodState(prevGood => prevGood + 1);
+				break;
 
-	onLeaveFeedback(type) {
-		this.setState({ [type]: this.state[type] + 1 });
-		this.countTotalFeedback();
-		this.countPositiveFeedbackPercentage();
-		console.log(this.state.good);
-	}
+			case 'neutral':
+				setNeutralState(prevNeutral => prevNeutral + 1);
+				break;
 
-	render() {
-		const { good, neutral, bad, total, positivePercentage } = this.state;
+			case 'bad':
+				setBadState(prevBad => prevBad + 1);
+				break;
 
-		return (
-			<div className={s.component}>
-				<Section title="Please leave feedback">
-					<FeedbackOptions
-						options={['good', 'neutral', 'bad']}
-						onLeaveFeedback={this.onLeaveFeedback}
-					/>
-				</Section>
+			default:
+				console.log('Invalid subscription type');
+		}
+	};
 
-				<Section title="Statistics">
-					<Statistics
-						good={good}
-						neutral={neutral}
-						bad={bad}
-						total={total}
-						positivePercentage={positivePercentage}
-					/>
-				</Section>
-			</div>
-		);
-	}
+	return (
+		<div className={s.component}>
+			<Section title="Please leave feedback">
+				<FeedbackOptions
+					options={['good', 'neutral', 'bad']}
+					onLeaveFeedback={onLeaveFeedback}
+				/>
+			</Section>
+
+			<Section title="Statistics">
+				<Statistics
+					good={good}
+					neutral={neutral}
+					bad={bad}
+					total={countTotalFeedback()}
+					positivePercentage={countPositiveFeedbackPercentage()}
+				/>
+			</Section>
+		</div>
+	);
 }
 
 export default App;
